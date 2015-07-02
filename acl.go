@@ -60,6 +60,15 @@ func (acl *ACL) HasAccessToFields(roles []string, action string, fields []string
 	return true
 }
 
+// return allowed global actions for roles
+func (acl *ACL) AllowedActions(roles []string) (allowedActions []string) {
+	return acl.global.AllowedActions(roles)
+}
+
+// return a slice of properties given roles have access to do given action
+func (acl *ACL) HasAccessToProperties(roles []string, action string) {
+}
+
 // read struct s tags & parse its permissions
 func NewACL(s interface{}) (acl *ACL) {
 	acl = &ACL{fields: make(map[string]*Permissions)}

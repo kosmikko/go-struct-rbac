@@ -37,6 +37,26 @@ func (p *Permissions) HasAccess(roles []string, action string) (isGranted bool) 
 	return false
 }
 
+// Return a list of actions given roles have access to
+func (p *Permissions) AllowedActions(roles []string) (allowedActions []string) {
+	roles = append(roles, "*")
+	// keep track of actions already in slice to avoid duplicates
+	already := make(map[string]bool)
+
+	for _, role := range roles {
+		roleAccess, roleDefined := p.RolesAccess[role]
+		if roleDefined {
+			for _, action := range roleAccess {
+				if !already[action] {
+					allowedActions = append(allowedActions, action)
+					already[action] = true
+				}
+			}
+		}
+	}
+	return
+}
+
 func NewPermissions(permissionsConfig string) (p *Permissions) {
 	p = &Permissions{RolesAccess: make(map[string][]string)}
 	rolesConfig := strings.Split(permissionsConfig, ",")

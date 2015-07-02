@@ -28,4 +28,10 @@ func TestACL(t *testing.T) {
 	assert.Equal(t, true, user.ACL.HasAccessToFields([]string{"admin"}, "read", []string{"password"}))
 	assert.Equal(t, true, user.ACL.HasAccessToFields([]string{"anon"}, "read", []string{"display_name"}))
 	assert.Equal(t, false, user.ACL.HasAccessToFields([]string{"anon"}, "read", []string{"display_name", "password"}))
+
+	allowedAdminActions := user.ACL.AllowedActions([]string{"admin", "owner"})
+	assert.Equal(t, len(allowedAdminActions), 3)
+	allowedAnonActions := user.ACL.AllowedActions([]string{"anon"})
+	assert.Equal(t, len(allowedAnonActions), 1)
+
 }
