@@ -6,10 +6,10 @@ import (
 )
 
 type User struct {
-	DisplayName string            `access:"admin:*, owner: read update, *: read" json:"display_name"`
-	Password    string            `access:"admin:*, owner: update" json:"password"`
-	Settings    map[string]string `access:"admin:*, owner: update" json:"settings"`
-	ACL         *ACL              `access:"admin:*, owner: update, *: read" access_field_name:"acl"`
+	DisplayName string            `access:"admin:*, owner: read update, *: read create" json:"display_name"`
+	Password    string            `access:"admin:*, owner: update, *: create" json:"password"`
+	Settings    map[string]string `access:"admin:*, owner: update, *: create" json:"settings"`
+	ACL         *ACL              `access:"admin:*, owner: update, *: read create" access_field_name:"acl"`
 }
 
 func TestACL(t *testing.T) {
@@ -31,9 +31,9 @@ func TestACL(t *testing.T) {
 	assert.Equal(t, false, user.ACL.HasAccessToFields([]string{"anon"}, "read", []string{"display_name", "password"}))
 
 	allowedAdminActions := user.ACL.AllowedActions([]string{"admin", "owner"})
-	assert.Equal(t, len(allowedAdminActions), 3)
+	assert.Equal(t, len(allowedAdminActions), 4)
 	allowedAnonActions := user.ACL.AllowedActions([]string{"anon"})
-	assert.Equal(t, len(allowedAnonActions), 1)
+	assert.Equal(t, len(allowedAnonActions), 2)
 
 	allowedAnonReadFields := user.ACL.AllowedFields([]string{"anon"}, "read")
 	assert.Equal(t, len(allowedAnonReadFields), 1)
@@ -45,11 +45,13 @@ func TestACL(t *testing.T) {
 
 	u1 := &User{DisplayName: "foobar"}
 	u2 := &User{DisplayName: "foobarx"}
-	anonActor := Actor{Roles: []string{"anon"}}
-	adminActor := Actor{Roles: []string{"anon", "admin"}}
+	anonActor := &Actor{Roles: []string{"anon"}}
+	adminActor := &Actor{Roles: []string{"anon", "admin"}}
 	err := user.ACL.CheckChangeAccess(anonActor, "update", u1, u2)
 	assert.NotNil(t, err)
 	err = user.ACL.CheckChangeAccess(adminActor, "update", u1, u2)
+	assert.Nil(t, err)
+	err = user.ACL.CheckAccess(anonActor, "create", u1)
 	assert.Nil(t, err)
 
 }

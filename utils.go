@@ -55,6 +55,18 @@ func GetFieldName(field reflect.StructField) (value string) {
 	return
 }
 
+func GetFieldNames(i interface{}) (fields []string) {
+	v := reflectValue(i)
+	objType := v.Type()
+	fieldsCount := v.NumField()
+	for i := 0; i < fieldsCount; i++ {
+		field := objType.Field(i)
+		fieldName := GetFieldName(field)
+		fields = append(fields, fieldName)
+	}
+	return
+}
+
 func GetChangedFields(a1, a2 interface{}) (err error, changes []string) {
 	v1 := reflectValue(a1)
 	v2 := reflectValue(a2)

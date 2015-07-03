@@ -51,7 +51,7 @@ func (acl *ACL) AllowedFields(roles []string, action string) (allowedFields []st
 	return
 }
 
-func (acl *ACL) CheckChangeAccess(actor Actor, action string, oldStruct, newStruct interface{}) (err error) {
+func (acl *ACL) CheckChangeAccess(actor *Actor, action string, oldStruct, newStruct interface{}) (err error) {
 	err, changes := GetChangedFields(oldStruct, newStruct)
 	if err != nil {
 		return
@@ -63,6 +63,16 @@ func (acl *ACL) CheckChangeAccess(actor Actor, action string, oldStruct, newStru
 	hasAccess := acl.HasAccessToFields(roles, action, changes)
 	if !hasAccess {
 		err = fmt.Errorf("No access to update fields %v", changes)
+	}
+	return
+}
+
+func (acl *ACL) CheckAccess(actor *Actor, action string, structToCheck interface{}) (err error) {
+	fields := GetFieldNames(structToCheck)
+	roles := actor.Roles
+	hasAccess := acl.HasAccessToFields(roles, action, fields)
+	if !hasAccess {
+		err = fmt.Errorf("No access to %s, fields %v", action, fields)
 	}
 	return
 }
