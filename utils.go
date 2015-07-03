@@ -66,14 +66,20 @@ func GetChangedFields(a1, a2 interface{}) (err error, changes []string) {
 		val2 := v2.Field(i)
 		i1, i2 := val1.Interface(), val2.Interface()
 		if isExportableField(field) {
+			areDifferent := false
 			switch i1.(type) {
 			case int, bool, string, float64:
 				if i1 != i2 {
-					fieldName := GetFieldName(field)
-					changes = append(changes, fieldName)
+					areDifferent = true
 				}
 			default:
-				// TODO handle unsupported types
+				if !reflect.DeepEqual(i1, i2) {
+					areDifferent = true
+				}
+			}
+			if areDifferent {
+				fieldName := GetFieldName(field)
+				changes = append(changes, fieldName)
 			}
 		}
 	}

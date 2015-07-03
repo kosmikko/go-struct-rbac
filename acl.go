@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -50,7 +51,19 @@ func (acl *ACL) AllowedFields(roles []string, action string) (allowedFields []st
 	return
 }
 
-func (acl *ACL) CheckUpdateAccess(actor Actor, oldStruct interface{}, newStruct interface{}) (err error) {
+func (acl *ACL) CheckChangeAccess(actor Actor, action string, oldStruct, newStruct interface{}) (err error) {
+	err, changes := GetChangedFields(oldStruct, newStruct)
+	if err != nil {
+		return
+	}
+	if len(changes) == 0 {
+		return
+	}
+	roles := actor.Roles
+	hasAccess := acl.HasAccessToFields(roles, action, changes)
+	if !hasAccess {
+		err = fmt.Errorf("No access to update fields %v", changes)
+	}
 	return
 }
 

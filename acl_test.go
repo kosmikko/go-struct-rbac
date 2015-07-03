@@ -6,9 +6,10 @@ import (
 )
 
 type User struct {
-	DisplayName string `access:"admin:*, owner: read update, *: read" json:"display_name"`
-	Password    string `access:"admin:*, owner: update" json:"password"`
-	ACL         *ACL   `access:"admin:*, owner: update, *: read" access_field_name:"acl"`
+	DisplayName string            `access:"admin:*, owner: read update, *: read" json:"display_name"`
+	Password    string            `access:"admin:*, owner: update" json:"password"`
+	Settings    map[string]string `access:"admin:*, owner: update" json:"settings"`
+	ACL         *ACL              `access:"admin:*, owner: update, *: read" access_field_name:"acl"`
 }
 
 func TestACL(t *testing.T) {
@@ -37,9 +38,18 @@ func TestACL(t *testing.T) {
 	allowedAnonReadFields := user.ACL.AllowedFields([]string{"anon"}, "read")
 	assert.Equal(t, len(allowedAnonReadFields), 1)
 	allowedAdminReadFields := user.ACL.AllowedFields([]string{"admin"}, "read")
-	assert.Equal(t, len(allowedAdminReadFields), 2)
+	assert.Equal(t, len(allowedAdminReadFields), 3)
 	assert.Equal(t, stringInSlice("password", allowedAdminReadFields), true)
 	allowedAdminDeleteFields := user.ACL.AllowedFields([]string{"admin"}, "delete")
-	assert.Equal(t, len(allowedAdminDeleteFields), 2)
+	assert.Equal(t, len(allowedAdminDeleteFields), 3)
+
+	u1 := &User{DisplayName: "foobar"}
+	u2 := &User{DisplayName: "foobarx"}
+	anonActor := Actor{Roles: []string{"anon"}}
+	adminActor := Actor{Roles: []string{"anon", "admin"}}
+	err := user.ACL.CheckChangeAccess(anonActor, "update", u1, u2)
+	assert.NotNil(t, err)
+	err = user.ACL.CheckChangeAccess(adminActor, "update", u1, u2)
+	assert.Nil(t, err)
 
 }
