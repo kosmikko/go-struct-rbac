@@ -34,4 +34,12 @@ func TestACL(t *testing.T) {
 	allowedAnonActions := user.ACL.AllowedActions([]string{"anon"})
 	assert.Equal(t, len(allowedAnonActions), 1)
 
+	allowedAnonReadFields := user.ACL.AllowedFields([]string{"anon"}, "read")
+	assert.Equal(t, len(allowedAnonReadFields), 1)
+	allowedAdminReadFields := user.ACL.AllowedFields([]string{"admin"}, "read")
+	assert.Equal(t, len(allowedAdminReadFields), 2)
+	assert.Equal(t, stringInSlice("password", allowedAdminReadFields), true)
+	allowedAdminDeleteFields := user.ACL.AllowedFields([]string{"admin"}, "delete")
+	assert.Equal(t, len(allowedAdminDeleteFields), 2)
+
 }

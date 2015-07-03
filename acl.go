@@ -65,8 +65,14 @@ func (acl *ACL) AllowedActions(roles []string) (allowedActions []string) {
 	return acl.global.AllowedActions(roles)
 }
 
-// return a slice of properties given roles have access to do given action
-func (acl *ACL) HasAccessToProperties(roles []string, action string) {
+// return a slice of struct fields given roles have access to do given action
+func (acl *ACL) AllowedFields(roles []string, action string) (allowedFields []string) {
+	for f, permissions := range acl.fields {
+		if permissions.HasAccess(roles, action) {
+			allowedFields = append(allowedFields, f)
+		}
+	}
+	return
 }
 
 // read struct s tags & parse its permissions
