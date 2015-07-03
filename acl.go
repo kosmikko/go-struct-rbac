@@ -2,32 +2,7 @@ package main
 
 import (
 	"reflect"
-	"strings"
 )
-
-// as struct tags can continue multiple values, this gets the first
-func GetFirstTagValue(tag reflect.StructTag, attr string) (value string) {
-	tagValue := tag.Get(attr)
-	if len(tagValue) == 0 {
-		return
-	}
-	value = strings.Split(tagValue, ",")[0]
-	return
-}
-
-// get field name based on struct tags
-func GetFieldName(field reflect.StructField) (value string) {
-	value = field.Tag.Get("access_field_name")
-	if len(value) > 0 {
-		return
-	}
-	value = GetFirstTagValue(field.Tag, "json")
-	if len(value) > 0 {
-		return
-	}
-	value = field.Name
-	return
-}
 
 // ACL defines struct's permissions globally (e.g. can read struct at all)
 // and per field (e.g. can read field's value)
@@ -72,6 +47,10 @@ func (acl *ACL) AllowedFields(roles []string, action string) (allowedFields []st
 			allowedFields = append(allowedFields, f)
 		}
 	}
+	return
+}
+
+func (acl *ACL) CheckUpdateAccess(actor Actor, oldStruct interface{}, newStruct interface{}) (err error) {
 	return
 }
 
